@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "363da213_cad3c510",
+        "filename": "src/lib.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001773
+      },
+      "writtenOn": "2025-11-24T16:41:29Z",
+      "side": 1,
+      "message": "Is there a reason while the whole crate is nested in this module? Is it in prevision for other versions\u0027 implementations?",
+      "revId": "bfb5f68c645d880ebff7a56c68931c110b9b705e",
+      "serverId": "8f6f209b-db1a-4cbf-aa44-c8bc30e9bfda"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f05ccac7_4fd36029",
+        "filename": "src/mhu_v3.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1001773
+      },
+      "writtenOn": "2025-11-24T16:41:29Z",
+      "side": 1,
+      "message": "Maybe use `4 - 1` for more clarity, similarly to l#185?",
+      "revId": "bfb5f68c645d880ebff7a56c68931c110b9b705e",
+      "serverId": "8f6f209b-db1a-4cbf-aa44-c8bc30e9bfda"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d21df527_b77497e5",
+        "filename": "src/mhu_v3.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1001773
+      },
+      "writtenOn": "2025-11-24T16:41:29Z",
+      "side": 1,
+      "message": "Maybe use `4 - 1` for more clarity, similarly to l#185?",
+      "revId": "bfb5f68c645d880ebff7a56c68931c110b9b705e",
+      "serverId": "8f6f209b-db1a-4cbf-aa44-c8bc30e9bfda"
+    }
+  ]
+}
