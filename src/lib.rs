@@ -8,6 +8,8 @@
 
 /// Control page driver module.
 pub mod control;
+/// Doorbell driver module.
+pub mod doorbell;
 
 /// MHU error type.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
