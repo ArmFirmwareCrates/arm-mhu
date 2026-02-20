@@ -1,12 +1,22 @@
-# Arm Message Handling Unit driver
+# Arm Message Handling Unit (MHU) driver
 
-Driver implementation for the [Arm Message Handling Unit Architecture](https://developer.arm.com/documentation/aes0072/ab/).
+Driver implementation for the Arm
+[Message Handling Unit](https://developer.arm.com/documentation/aes0072/ab/) (ARM-AES-0072 A.b).
+
+It provides a self-contained driver for each MHU component, channel, or page (control, doorbell,
+FIFO, fast channel, and security control), as well as a top-level driver that manages the MHU as a
+whole. With the top-level driver, users can borrow, take, or split the listed components into
+individual drivers as needed.
 
 ## Implemented features
 
-## Feature flags
-
-## Future plans
+* MHU v3 support
+* Separate Postbox and Mailbox drivers
+* Doorbell Channel support
+* FIFO Channel support
+* Fast Channel support
+* TrustZone and Realm Management Extensions
+* Unit tests
 
 ## License
 
