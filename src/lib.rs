@@ -10,6 +10,8 @@
 pub mod control;
 /// Doorbell driver module.
 pub mod doorbell;
+/// FIFO driver module.
+pub mod fifo;
 
 /// MHU error type.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
