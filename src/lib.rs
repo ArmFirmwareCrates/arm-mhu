@@ -10,6 +10,8 @@
 pub mod control;
 /// Doorbell driver module.
 pub mod doorbell;
+/// Fast channel driver module.
+pub mod fast_channel;
 /// FIFO driver module.
 pub mod fifo;
 
