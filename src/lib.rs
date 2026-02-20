@@ -14,6 +14,8 @@ pub mod doorbell;
 pub mod fast_channel;
 /// FIFO driver module.
 pub mod fifo;
+/// Sender/Receiver Security Control module.
+pub mod security_control;
 
 /// MHU error type.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
