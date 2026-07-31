@@ -302,8 +302,6 @@ impl<'a> MhuMailboxFastChannel<'a> {
 
 #[cfg(test)]
 mod tests {
-    use core::ptr::NonNull;
-
     use super::*;
     use crate::tests::define_fake_regs;
 
@@ -391,11 +389,11 @@ mod tests {
     #[test]
     #[should_panic]
     fn postbox_invalid_word_size() {
-        // Safety: The pointer will not be dereferenced, the test only check whether `new` panics on invalid word size.
-        let regs = unsafe { UniqueMmioPointer::new(NonNull::new(0x1000 as *mut _).unwrap()) };
+        let mut regs = MhuPostboxFastChannelOpaqueRegisters { regs: [0; 1024] };
+        let ptr = UniqueMmioPointer::from(&mut regs);
         let config = FchCfg0(1 << 21);
 
-        MhuPostboxFastChannel::new(regs, config);
+        MhuPostboxFastChannel::new(ptr, config);
     }
 
     #[test]
@@ -458,11 +456,11 @@ mod tests {
     #[test]
     #[should_panic]
     fn mailbox_invalid_word_size() {
-        // Safety: The pointer will not be dereferenced, the test only check whether `new` panics on invalid word size.
-        let regs = unsafe { UniqueMmioPointer::new(NonNull::new(0x1000 as *mut _).unwrap()) };
+        let mut regs = MhuMailboxFastChannelOpaqueRegisters { regs: [0; 1024] };
+        let ptr = UniqueMmioPointer::from(&mut regs);
         let config = FchCfg0(1 << 21);
 
-        MhuMailboxFastChannel::new(regs, config);
+        MhuMailboxFastChannel::new(ptr, config);
     }
 
     #[test]
