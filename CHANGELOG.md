@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bugfixes
+
+- Fix `Mhu*boxFastChannel::new` lifetimes so returned drivers cannot outlive their register storage.
+
 ## 0.1.1
 
 ### Improvements

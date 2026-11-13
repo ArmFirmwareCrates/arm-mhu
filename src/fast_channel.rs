@@ -138,7 +138,7 @@ pub enum MhuPostboxFastChannel<'a> {
 impl<'a> MhuPostboxFastChannel<'a> {
     /// Creates new instance.
     pub fn new(
-        mut regs: UniqueMmioPointer<MhuPostboxFastChannelOpaqueRegisters>,
+        mut regs: UniqueMmioPointer<'a, MhuPostboxFastChannelOpaqueRegisters>,
         config: FchCfg0,
     ) -> Self {
         match config.word_size() {
@@ -257,7 +257,7 @@ pub enum MhuMailboxFastChannel<'a> {
 impl<'a> MhuMailboxFastChannel<'a> {
     /// Creates new instance.
     pub fn new(
-        mut regs: UniqueMmioPointer<MhuMailboxFastChannelOpaqueRegisters>,
+        mut regs: UniqueMmioPointer<'a, MhuMailboxFastChannelOpaqueRegisters>,
         config: FchCfg0,
     ) -> Self {
         match config.word_size() {
