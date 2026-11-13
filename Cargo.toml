@@ -3,7 +3,7 @@
 
 [package]
 name = "arm-mhu"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 description = "Arm Message Handling Unit (MHU) driver"
 license = "MIT OR Apache-2.0"
@@ -14,7 +14,7 @@ readme = "README.md"
 rust-version = "1.88"
 
 [dependencies]
-bitflags = "2.13.1"
+bitflags = "2.13.2"
 num_enum = { version = "0.7.6", default-features = false }
-safe-mmio = "0.3.1"
-zerocopy = { version = "0.8", features = ["derive"] }
+safe-mmio = "0.4.0"
+zerocopy = { version = "0.8.63", features = ["derive"] }

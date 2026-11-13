@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
 ### Bugfixes
 
@@ -12,6 +12,7 @@
   hardware's access width and implemented channel layout.
 - Make `Mhu*boxFifo::new` and `Mhu*boxFifos::new` unsafe: callers must ensure the configuration
   matches the hardware's supported payload access widths and implemented channels.
+- Updated to `safe-mmio` 0.4.0.
 
 ## 0.1.1
 
