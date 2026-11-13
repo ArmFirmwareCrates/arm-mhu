@@ -135,7 +135,8 @@ impl<'a> MhuPostbox<'a> {
     /// Returns all FIFO Channel instances.
     pub fn fifos(&mut self) -> Option<MhuPostboxFifos<'_>> {
         if let Some(config) = self.control().fifo_config() {
-            Some(MhuPostboxFifos::new(field!(self.regs, pffcw_page), config))
+            // Safety: The configuration was read from the same postbox as the FIFO page.
+            Some(unsafe { MhuPostboxFifos::new(field!(self.regs, pffcw_page), config) })
         } else {
             None
         }
@@ -146,10 +147,10 @@ impl<'a> MhuPostbox<'a> {
         if let Some(config) = self.control().fifo_config()
             && channel < config.channel_count()
         {
-            Some(MhuPostboxFifo::new(
-                field!(self.regs, pffcw_page).take(channel).unwrap(),
-                config,
-            ))
+            // Safety: The configuration was read from this postbox, and the channel is implemented.
+            Some(unsafe {
+                MhuPostboxFifo::new(field!(self.regs, pffcw_page).take(channel).unwrap(), config)
+            })
         } else {
             None
         }
@@ -158,10 +159,8 @@ impl<'a> MhuPostbox<'a> {
     /// Returns Fast Channel instance.
     pub fn fast_channel(&mut self) -> Option<MhuPostboxFastChannel<'_>> {
         if let Some(config) = self.control().fast_channel_config() {
-            Some(MhuPostboxFastChannel::new(
-                field!(self.regs, pfcw_page),
-                config,
-            ))
+            // Safety: The configuration was read from the same postbox as the fast channel page.
+            Some(unsafe { MhuPostboxFastChannel::new(field!(self.regs, pfcw_page), config) })
         } else {
             None
         }
@@ -186,13 +185,15 @@ impl<'a> MhuPostbox<'a> {
             .doorbell_config()
             .map(|config| MhuPostboxDoorbells::new(doorbell_regs, config.channel_count()));
 
-        let fifos = control
-            .fifo_config()
-            .map(|config| MhuPostboxFifos::new(fifo_regs, config));
+        let fifos = control.fifo_config().map(|config| {
+            // Safety: The config and FIFO pages belong to the same postbox.
+            unsafe { MhuPostboxFifos::new(fifo_regs, config) }
+        });
 
-        let fast_channel = control
-            .fast_channel_config()
-            .map(|config| MhuPostboxFastChannel::new(fast_channel_regs, config));
+        let fast_channel = control.fast_channel_config().map(|config| {
+            // Safety: The config and fast channel pages belong to the same postbox.
+            unsafe { MhuPostboxFastChannel::new(fast_channel_regs, config) }
+        });
 
         (control, doorbells, fifos, fast_channel)
     }
@@ -245,7 +246,8 @@ impl<'a> MhuMailbox<'a> {
     /// Returns all FIFO Channel instances.
     pub fn fifos(&mut self) -> Option<MhuMailboxFifos<'_>> {
         if let Some(config) = self.control().fifo_config() {
-            Some(MhuMailboxFifos::new(field!(self.regs, mffcw_page), config))
+            // Safety: The configuration was read from the same mailbox as the FIFO page.
+            Some(unsafe { MhuMailboxFifos::new(field!(self.regs, mffcw_page), config) })
         } else {
             None
         }
@@ -256,10 +258,10 @@ impl<'a> MhuMailbox<'a> {
         if let Some(config) = self.control().fifo_config()
             && channel < config.channel_count()
         {
-            Some(MhuMailboxFifo::new(
-                field!(self.regs, mffcw_page).take(channel).unwrap(),
-                config,
-            ))
+            // Safety: The configuration was read from this mailbox, and the channel is implemented.
+            Some(unsafe {
+                MhuMailboxFifo::new(field!(self.regs, mffcw_page).take(channel).unwrap(), config)
+            })
         } else {
             None
         }
@@ -268,10 +270,8 @@ impl<'a> MhuMailbox<'a> {
     /// Returns Fast Channel instance.
     pub fn fast_channel(&mut self) -> Option<MhuMailboxFastChannel<'_>> {
         if let Some(config) = self.control().fast_channel_config() {
-            Some(MhuMailboxFastChannel::new(
-                field!(self.regs, mfcw_page),
-                config,
-            ))
+            // Safety: The configuration was read from the same mailbox as the fast channel page.
+            Some(unsafe { MhuMailboxFastChannel::new(field!(self.regs, mfcw_page), config) })
         } else {
             None
         }
@@ -296,13 +296,15 @@ impl<'a> MhuMailbox<'a> {
             .doorbell_config()
             .map(|config| MhuMailboxDoorbells::new(doorbell_regs, config.channel_count()));
 
-        let fifos = control
-            .fifo_config()
-            .map(|config| MhuMailboxFifos::new(fifo_regs, config));
+        let fifos = control.fifo_config().map(|config| {
+            // Safety: The config and FIFO pages belong to the same mailbox.
+            unsafe { MhuMailboxFifos::new(fifo_regs, config) }
+        });
 
-        let fast_channel = control
-            .fast_channel_config()
-            .map(|config| MhuMailboxFastChannel::new(fast_channel_regs, config));
+        let fast_channel = control.fast_channel_config().map(|config| {
+            // Safety: The config  and fast channel pages belong to the same mailbox.
+            unsafe { MhuMailboxFastChannel::new(fast_channel_regs, config) }
+        });
 
         (control, doorbells, fifos, fast_channel)
     }
@@ -398,7 +400,13 @@ pub struct MhuPostboxFifos<'a> {
 
 impl<'a> MhuPostboxFifos<'a> {
     /// Creates new FIFOs instance.
-    pub fn new(
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the FIFO channels at `regs`, including the implemented channel count
+    /// and supported payload access widths. All payload writes enabled by `config` must be safe
+    /// for every implemented channel.
+    pub unsafe fn new(
         regs: UniqueMmioPointer<'a, [MhuPostboxFifoRegisters; 64]>,
         config: FfchCfg0,
     ) -> Self {
@@ -408,10 +416,9 @@ impl<'a> MhuPostboxFifos<'a> {
     /// Borrows a single FIFO instance. Returns `None` if the channel is not implemented.
     pub fn fifo<'regs>(&'regs mut self, channel: usize) -> Option<MhuPostboxFifo<'regs>> {
         if channel < self.config.channel_count() {
-            Some(MhuPostboxFifo::new(
-                self.regs.get(channel).unwrap(),
-                self.config,
-            ))
+            // Safety: The new() guarantees the configuration matches every implemented channel,
+            // and the channel index has been checked.
+            Some(unsafe { MhuPostboxFifo::new(self.regs.get(channel).unwrap(), self.config) })
         } else {
             None
         }
@@ -421,10 +428,9 @@ impl<'a> MhuPostboxFifos<'a> {
     /// is not implemented.
     pub fn take(self, channel: usize) -> Option<MhuPostboxFifo<'a>> {
         if channel < self.config.channel_count() {
-            Some(MhuPostboxFifo::new(
-                self.regs.take(channel).unwrap(),
-                self.config,
-            ))
+            // Safety: new() guarantees the configuration matches every implemented channel, and the
+            // channel index has been checked.
+            Some(unsafe { MhuPostboxFifo::new(self.regs.take(channel).unwrap(), self.config) })
         } else {
             None
         }
@@ -433,9 +439,11 @@ impl<'a> MhuPostboxFifos<'a> {
     /// Splits the chosen FIFOs into individual FIFO objects.
     pub fn split_some<const N: usize>(self, chosen: [usize; N]) -> [MhuPostboxFifo<'a>; N] {
         assert!(chosen.iter().all(|i| *i < self.config.channel_count()));
-        self.regs
-            .split_some(chosen)
-            .map(|regs| MhuPostboxFifo::new(regs, self.config))
+        self.regs.split_some(chosen).map(|regs| {
+            // Safety: new() guarantees the configuration matches every implemented channel, and all
+            // chosen channel indices have been checked.
+            unsafe { MhuPostboxFifo::new(regs, self.config) }
+        })
     }
 }
 
@@ -447,7 +455,13 @@ pub struct MhuMailboxFifos<'a> {
 
 impl<'a> MhuMailboxFifos<'a> {
     /// Creates new FIFOs instance.
-    pub fn new(
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the FIFO channels at `regs`, including the implemented channel count
+    /// and supported payload access widths. All payload reads enabled by `config` must be safe
+    /// for every implemented channel.
+    pub unsafe fn new(
         regs: UniqueMmioPointer<'a, [MhuMailboxFifoRegisters; 64]>,
         config: FfchCfg0,
     ) -> Self {
@@ -457,10 +471,9 @@ impl<'a> MhuMailboxFifos<'a> {
     /// Borrows a single FIFO instance. Returns `None` if the channel is not implemented.
     pub fn fifo<'regs>(&'regs mut self, channel: usize) -> Option<MhuMailboxFifo<'regs>> {
         if channel < self.config.channel_count() {
-            Some(MhuMailboxFifo::new(
-                self.regs.get(channel).unwrap(),
-                self.config,
-            ))
+            // Safety: The new() guarantees the configuration matches every implemented channel,
+            // and the channel index has been checked.
+            Some(unsafe { MhuMailboxFifo::new(self.regs.get(channel).unwrap(), self.config) })
         } else {
             None
         }
@@ -470,10 +483,9 @@ impl<'a> MhuMailboxFifos<'a> {
     /// is not implemented.
     pub fn take(self, channel: usize) -> Option<MhuMailboxFifo<'a>> {
         if channel < self.config.channel_count() {
-            Some(MhuMailboxFifo::new(
-                self.regs.take(channel).unwrap(),
-                self.config,
-            ))
+            // Safety: new() guarantees the configuration matches every implemented channel, and the
+            // channel index has been checked.
+            Some(unsafe { MhuMailboxFifo::new(self.regs.take(channel).unwrap(), self.config) })
         } else {
             None
         }
@@ -482,9 +494,11 @@ impl<'a> MhuMailboxFifos<'a> {
     /// Splits the chosen FIFOs into individual FIFO objects.
     pub fn split_some<const N: usize>(self, chosen: [usize; N]) -> [MhuMailboxFifo<'a>; N] {
         assert!(chosen.iter().all(|i| *i < self.config.channel_count()));
-        self.regs
-            .split_some(chosen)
-            .map(|regs| MhuMailboxFifo::new(regs, self.config))
+        self.regs.split_some(chosen).map(|regs| {
+            // Safety: new() guarantees the configuration matches every implemented channel, and all
+            // chosen channel indices have been checked.
+            unsafe { MhuMailboxFifo::new(regs, self.config) }
+        })
     }
 }
 
@@ -523,8 +537,11 @@ mod tests {
                     UniqueMmioPointer::from(zerocopy::transmute_mut!(&mut self.regs))
                 }
 
+                #[allow(unused_unsafe)] // The macro supports both safe and unsafe constructors.
                 pub fn instance_for_test(&mut self) -> $driver<'_> {
-                    <$driver>::new(self.get(), $( $init_params )?)
+                    // Safety: The fake registers are normal, 8 byte aligned memory supporting all
+                    // payload access widths enabled by the test configuration.
+                    unsafe { <$driver>::new(self.get(), $( $init_params )?) }
                 }
             }
         };

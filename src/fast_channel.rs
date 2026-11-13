@@ -137,7 +137,12 @@ pub enum MhuPostboxFastChannel<'a> {
 
 impl<'a> MhuPostboxFastChannel<'a> {
     /// Creates new instance.
-    pub fn new(
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the access width and implemented channel layout of the device at
+    /// `regs`. All payload writes enabled by `config` must be safe for that device.
+    pub unsafe fn new(
         mut regs: UniqueMmioPointer<'a, MhuPostboxFastChannelOpaqueRegisters>,
         config: FchCfg0,
     ) -> Self {
@@ -153,8 +158,9 @@ impl<'a> MhuPostboxFastChannel<'a> {
                     .cast::<MhuPostboxFastChannel32Registers>();
                 assert!(ptr.is_aligned());
 
-                // Safety: `regs` is guaranteed to be a valid pointer, and the conversion to the
-                // specific type is checked for size/alignment correctness, thus `ptr` is valid.
+                // Safety: The caller guarantees that `config` describes this register block,
+                // including support for 32 bit payload writes. Size and alignment are checked,
+                // and the new pointer preserves the original lifetime and unique access.
                 let regs = unsafe { UniqueMmioPointer::new(ptr) };
                 let fast_channel = MhuPostboxFastChannel32::new(regs, config);
                 Self::FastChannel32(fast_channel)
@@ -170,8 +176,9 @@ impl<'a> MhuPostboxFastChannel<'a> {
                     .cast::<MhuPostboxFastChannel64Registers>();
                 assert!(ptr.is_aligned());
 
-                // Safety: `regs` is guaranteed to be a valid pointer, and the conversion to the
-                // specific type is checked for size/alignment correctness, thus `ptr` is valid.
+                // Safety: The caller guarantees that `config` describes this register block,
+                // including support for 64 bit payload writes. Size and alignment are checked,
+                // and the new pointer preserves the original lifetime and unique access.
                 let regs = unsafe { UniqueMmioPointer::new(ptr) };
                 let fast_channel = MhuPostboxFastChannel64::new(regs, config);
                 Self::FastChannel64(fast_channel)
@@ -256,7 +263,12 @@ pub enum MhuMailboxFastChannel<'a> {
 
 impl<'a> MhuMailboxFastChannel<'a> {
     /// Creates new instance.
-    pub fn new(
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the access width and implemented channel layout of the device at
+    /// `regs`. All payload writes enabled by `config` must be safe for that device.
+    pub unsafe fn new(
         mut regs: UniqueMmioPointer<'a, MhuMailboxFastChannelOpaqueRegisters>,
         config: FchCfg0,
     ) -> Self {
@@ -272,8 +284,9 @@ impl<'a> MhuMailboxFastChannel<'a> {
                     .cast::<MhuMailboxFastChannel32Registers>();
                 assert!(ptr.is_aligned());
 
-                // Safety: `regs` is guaranteed to be a valid pointer, and the conversion to the
-                // specific type is checked for size/alignment correctness, thus `ptr` is valid.
+                // Safety: The caller guarantees that `config` describes this register block,
+                // including support for 32 bit payload reads. Size and alignment are checked,
+                // and the new pointer preserves the original lifetime and unique access.
                 let regs = unsafe { UniqueMmioPointer::new(ptr) };
                 let fast_channel = MhuMailboxFastChannel32::new(regs, config);
                 MhuMailboxFastChannel::FastChannel32(fast_channel)
@@ -289,8 +302,9 @@ impl<'a> MhuMailboxFastChannel<'a> {
                     .cast::<MhuMailboxFastChannel64Registers>();
                 assert!(ptr.is_aligned());
 
-                // Safety: `regs` is guaranteed to be a valid pointer, and the conversion to the
-                // specific type is checked for size/alignment correctness, thus `ptr` is valid.
+                // Safety: The caller guarantees that `config` describes this register block,
+                // including support for 64 bit payload reads. Size and alignment are checked,
+                // and the new pointer preserves the original lifetime and unique access.
                 let regs = unsafe { UniqueMmioPointer::new(ptr) };
                 let fast_channel = MhuMailboxFastChannel64::new(regs, config);
                 MhuMailboxFastChannel::FastChannel64(fast_channel)
@@ -393,7 +407,8 @@ mod tests {
         let ptr = UniqueMmioPointer::from(&mut regs);
         let config = FchCfg0(1 << 21);
 
-        MhuPostboxFastChannel::new(ptr, config);
+        // Safety: The unsupported word size panics before any payload access or pointer conversion.
+        unsafe { MhuPostboxFastChannel::new(ptr, config) };
     }
 
     #[test]
@@ -460,7 +475,8 @@ mod tests {
         let ptr = UniqueMmioPointer::from(&mut regs);
         let config = FchCfg0(1 << 21);
 
-        MhuMailboxFastChannel::new(ptr, config);
+        // Safety: The unsupported word size panics before any payload access or pointer conversion.
+        unsafe { MhuMailboxFastChannel::new(ptr, config) };
     }
 
     #[test]

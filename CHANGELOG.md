@@ -6,6 +6,13 @@
 
 - Fix `Mhu*boxFastChannel::new` lifetimes so returned drivers cannot outlive their register storage.
 
+### Breaking changes
+
+- Make `Mhu*boxFastChannel::new` unsafe: callers must ensure the configuration matches the
+  hardware's access width and implemented channel layout.
+- Make `Mhu*boxFifo::new` and `Mhu*boxFifos::new` unsafe: callers must ensure the configuration
+  matches the hardware's supported payload access widths and implemented channels.
+
 ## 0.1.1
 
 ### Improvements

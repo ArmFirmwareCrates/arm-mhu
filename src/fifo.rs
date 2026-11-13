@@ -301,7 +301,15 @@ pub struct MhuPostboxFifo<'a> {
 
 impl<'a> MhuPostboxFifo<'a> {
     /// Creates new instance.
-    pub fn new(regs: UniqueMmioPointer<'a, MhuPostboxFifoRegisters>, config: FfchCfg0) -> Self {
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the FIFO at `regs`, including its supported payload access widths.
+    /// All payload writes enabled by `config` must be safe for that device.
+    pub unsafe fn new(
+        regs: UniqueMmioPointer<'a, MhuPostboxFifoRegisters>,
+        config: FfchCfg0,
+    ) -> Self {
         Self { regs, config }
     }
 
@@ -458,7 +466,8 @@ impl<'a> MhuPostboxFifo<'a> {
         T: FromBytes + IntoBytes + Immutable,
     {
         // Safety: This function is only called internally with u8, u16, u32 or u64 types,
-        // after checking whether pffcw_pay supports the requested access width.
+        // after checking whether config enables the requested access width. The constructor's
+        // caller guarantees that config matches the device's supported payload access widths.
         let mut payload = unsafe {
             UniqueMmioPointer::new(
                 field!(self.regs, pffcw_pay)
@@ -489,7 +498,15 @@ pub struct MhuMailboxFifo<'a> {
 
 impl<'a> MhuMailboxFifo<'a> {
     /// Creates new instance.
-    pub fn new(regs: UniqueMmioPointer<'a, MhuMailboxFifoRegisters>, config: FfchCfg0) -> Self {
+    ///
+    /// # Safety
+    ///
+    /// `config` must describe the FIFO at `regs`, including its supported payload access widths.
+    /// All payload reads enabled by `config` must be safe for that device.
+    pub unsafe fn new(
+        regs: UniqueMmioPointer<'a, MhuMailboxFifoRegisters>,
+        config: FfchCfg0,
+    ) -> Self {
         Self { regs, config }
     }
 
@@ -647,7 +664,8 @@ impl<'a> MhuMailboxFifo<'a> {
         T: FromBytes + IntoBytes,
     {
         // Safety: This function is only called internally with u8, u16, u32 or u64 types,
-        // after checking whether mffcw_pay supports the requested access width.
+        // after checking whether config enables the requested access width. The constructor's
+        // caller guarantees that config matches the device's supported payload access widths.
         let mut payload = unsafe {
             UniqueMmioPointer::new(
                 field!(self.regs, mffcw_pay)
